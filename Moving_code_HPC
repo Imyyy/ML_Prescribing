@@ -2,3 +2,4 @@ pwd
 cd Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code
 ssh imp
 scp Combining_data_frames.ipynb isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home
+scp Create_Toy_Prescription_Data.R isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home
