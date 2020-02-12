@@ -12,3 +12,7 @@ scp ../Data/T201911PDPI_BNFT.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/
 
 #Takes a long time to move over prescription data because of file size
 # Not uploading ToyPres as using the HPC to look at the full dataset
+
+
+#Link to full dataset:
+https://jupyter.rcs.imperial.ac.uk/user/isy16/lab/tree/ML_Project/Combining_FULL_data_frames.ipynb
