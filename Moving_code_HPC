@@ -1,5 +1,14 @@
 pwd
 cd Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code
 ssh imp
-scp Combining_data_frames.ipynb isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home
-scp Create_Toy_Prescription_Data.R isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home
+scp Combining_data_frames.ipynb isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp Create_Toy_Prescription_Data.R isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../T201911CHEM_SUBS.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../Data/gpheadings.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../Data/people.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../Data/structure.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../Data/allgp.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project
+scp ../Data/T201911PDPI_BNFT.csv isy16@login.cx1.hpc.ic.ac.uk:/rds/general/user/isy16/home/ML_Project 
+
+#Takes a long time to move over prescription data because of file size
+# Not uploading ToyPres as using the HPC to look at the full dataset
