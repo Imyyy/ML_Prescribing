@@ -1,0 +1,52 @@
+---
+title: "Initial_analysis_plots"
+author: "Imy Younge"
+date: "18/02/2020"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir ='/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') # Setwd
+```
+
+```{r}
+suppressPackageStartupMessages(library(dplyr))
+```
+
+```{r}
+data <- read.csv("../Data/Combined_TOYCOMP_BNF_NHS_data.csv") # Import dataset from data file
+bnfsection <- read.csv("../Data/bnf_bnf_section_dictionary")
+bnfchapter <- read.csv("../Data/bnf_chapter_dictionary")
+bnfparagraph <- read.csv("../Data/bnf_paragraph_dictionary")
+```
+
+```{r}
+summary(data)
+colnames(data)
+```
+```{r}
+data$items <- as.integer(data$items)
+```
+
+# Grouping prescriptions by practice
+```{r}
+practices <- data %>%
+  group_by(e8...) %>%
+  arrange(e8...) %>%
+  summarise(act.cost = sum(act.cost, na.rm=TRUE)) %>%
+  summarise(total.items = sum(items, na.rm=TRUE))
+head(practices)
+```
+
+
+# CCG Grouping
+
+```{r}
+# Aggregating by CCG code
+toychaptergroup <- data %>% 
+  group_by(commissioner) %>%
+  summarise(sum = sum(act.cost, na.rm=TRUE))
+str(toychaptergroup)
+```
+
