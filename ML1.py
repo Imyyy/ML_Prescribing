@@ -8,8 +8,9 @@ Created on Wed Feb 26 16:51:25 2020
 # Set up 
 import os
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') 
 final = pd.read_csv('final.csv') # Correction: Need to use the dataset outputted by categorical_and_exclusion
@@ -84,23 +85,165 @@ X_train_pca = pca.transform(X_train) #Need to do the same idea to training data 
 #X_train_pca.columns = ['PC1','PC2', 'PC3', 'PC4', 'PC5']
 X_train_pca.head()
 
+#### Plots from PCA - see jupyter
+
 #############################################
 # KNN
-from sklearn import neighbours
-
-knn = neighbors.KNeighborsClassifier() # Name the knn fitter
+from sklearn.neighbors import KNeighborsClassifier 
+# Unsupervised: NearestNeighbors
+knn = KNeighborsClassifier(n_neighbors=5) # Name the knn fitter
 knn.fit(X_train, y_train) # Fitting the model
 y_pred = knn.predict(X_test) # Creating the predictions for the first 100 rows test set
-accuracy = np.sum(y_pred == y_test) / len(y_pred) # Comparing to truth to work out accuracy of model
-idx_wrong = np.nonzero(y_pred != y_test[:100]) # Creating a group of all the ones that were classified wrong
-print('Accuracy = {0:.1f}%.'.format(accuracy * 100)) #Print out
+
+from sklearn.metrics import classification_report, confusion_matrix
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+
+# Trying to plot the number of k values against the amount of errror for that value
+error = []
+for i in range(1, 40):
+    knn = KNeighborsClassifier(n_neighbors=i)
+    knn.fit(X_train, y_train)
+    pred_i = knn.predict(X_test)
+    error.append(np.mean(pred_i != y_test))
+
+plt.figure(figsize=(12, 6))
+plt.plot(range(1, 40), error, color='red', linestyle='dashed', marker='o',
+         markerfacecolor='blue', markersize=10)
+plt.title('Error Rate K Value')
+plt.xlabel('K Value')
+plt.ylabel('Mean Error')
+
+# Need to make a meshgrid to flow through the areas
+
+
+# There is an arror here somewhere, need to fix it at some point
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import VotingClassifier
+
+# Loading some example data
+X = X_train
+y = y_train
+
+# Training classifiers
+clf1 = DecisionTreeClassifier(max_depth=4)
+clf2 = KNeighborsClassifier(n_neighbors=7)
+clf3 = SVC(gamma=.1, kernel='rbf', probability=True)
+eclf = VotingClassifier(estimators=[('dt', clf1), ('knn', clf2),
+                                    ('svc', clf3)],
+                        voting='soft', weights=[2, 1, 2])
+
+clf1.fit(X, y)
+clf2.fit(X, y)
+clf3.fit(X, y)
+eclf.fit(X, y)
+
+# Plotting decision regions
+x_min, x_max = X.iloc[:, 0].min() - 1, X.iloc[:, 0].max() + 1
+y_min, y_max = y.min() - 1, y.max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
+                     np.arange(y_min, y_max, 0.1))
+X = pd.DataFrame.to_numpy(X)
+y = pd.DataFrame.to_numpy(y)
+
+f, axarr = plt.subplots(2, 2, sharex='col', sharey='row', figsize=(10, 8))
+
+for idx, clf, tt in zip(product([0, 1], [0, 1]),
+                        [clf1, clf2, clf3, eclf],
+                        ['Decision Tree (depth=4)', 'KNN (k=7)',
+                         'Kernel SVM', 'Soft Voting']):
+
+    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    axarr[idx[0], idx[1]].contourf(xx, yy, Z, alpha=0.4)
+    axarr[idx[0], idx[1]].scatter(X[:, 0], X[:, 1], c=y,
+                                  s=20, edgecolor='k')
+    axarr[idx[0], idx[1]].set_title(tt)
+
+plt.show()
+
 
 #############################################0
-# Linear regression
+# Logistic regression - do I need to penalise this?
+# Going to try and predict ehether above or below the threshold
+
+from sklearn.linear_model import LogisticRegressionCV #Using CV as it has in
+from sklearn.metrics import accuracy_score
+logreg = LogisticRegressionCV(cv=5, random_state=0) #Labelling thefeature
+logreg.fit(X_train, y_train) # Training the model - lets try 5 folds
+y_pred = logreg.predict(X_test) 
+logreg.get_params()
+accuracy = accuracy_score(y_test,y_pred)
+logreg.score(X_test, y_pred) # Mean accuracy on the given test data and labels
+
+plt.scatter(y_test, y_pred)
+plt.title('Comparing test data point and the predicted value')
+plt.xlabel('Actual y value')
+plt.ylabel('Predicted y value')
+plt.show()
+
+# Training set info
+from matplotlib.colors import ListedColormap
+x_set, y_set = x_train, y_train
+x1, x2 = np.meshgrid(np.arange(start = x_set[:,0].min()-1,stop = x_set[:,0].max()+1, step =0.01),
+np.arange(start = x_set[:,1].min()-1,stop = x_set[:,1].max()+1, step =0.01))
+plt.contourf(x1, x2, classifier.predict(np.array([x1.ravel(), x2.ravel()]).T).reshape(x1.shape),
+alpha = 0.75, cmap = ListedColormap((‘red’, ‘green’)))
+plt.xlim(x1.min(), x1.max())
+plt.ylim(x1.min(), x2.max())
+for i,j in enumerate(np.unique(y_set)):
+plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
+c = ListedColormap((‘red’, ‘green’))(i),label = j)
+plt.title(‘Logistic Regression (Training set)’)
+plt.xlabel(‘Age’)
+plt.ylabel(‘Estimated Salary’)
+plt.show()
+
+# Test set plot
+from matplotlib.colors import ListedColormap
+x_set, y_set = x_test, y_test
+x1, x2 = np.meshgrid(np.arange(start = x_set[:,0].min()-1,stop = x_set[:,0].max()+1, step =0.01),
+np.arange(start = x_set[:,1].min()-1,stop = x_set[:,1].max()+1, step =0.01))
+plt.contourf(x1, x2, classifier.predict(np.array([x1.ravel(), x2.ravel()]).T).reshape(x1.shape),
+alpha = 0.75, cmap = ListedColormap((‘red’, ‘green’)))
+plt.xlim(x1.min(), x1.max())
+plt.ylim(x1.min(), x2.max())
+for i,j in enumerate(np.unique(y_set)):
+plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
+c = ListedColormap((‘red’, ‘green’))(i),label = j)
+plt.title(‘Logistic Regression (Testing set)’)
+plt.xlabel(‘Age’)
+plt.ylabel(‘Estimated Salary’)
+plt.show()
+
+
+
+
+
+#Evaluating this model using mean squared error
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
+import numpy as np
+#Training
+print(np.sqrt(mean_squared_error(y_train, y_pred))) #RMSE training set
+print(r2_score(y_train, y_pred)) #R2 training
+#Test
+y_predtest = linearRegressor.predict(X_test)
+print(np.sqrt(mean_squared_error(y_test, y_predtest))) #RMSE test
+print(r2_score(y_test, y_predtest)) #R2 test
+
+
+#############################################0
+# Linear regression - might need to do penalised regression because of the amount of correlation in my data
+# Going to try and predict the number of people at each gp surgery,
 from sklearn.linear_model import LinearRegression
-linearRegressor = LinearRegression() #Labelling thefeature
-linearRegressor.fit(X_train, y_train) # Training the model
-y_pred = linearRegressor.predict(X_train) 
+linreg = LinearRegression() #Labelling thefeature
+linreg.fit(X_train, y_train) # Training the model
+y_pred = linreg.predict(X_train) 
 
 plt.scatter(y_train, y_pred)
 plt.title('Comparing training data point and the predicted value')
