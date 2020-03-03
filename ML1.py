@@ -188,20 +188,26 @@ plt.show()
 
 # Training set info
 from matplotlib.colors import ListedColormap
-x_set, y_set = x_train, y_train
+#x_set, y_set = X_train, y_train
+x_set = pd.DataFrame.to_numpy(X_train)
+y_set = pd.DataFrame.to_numpy(y_train)
 x1, x2 = np.meshgrid(np.arange(start = x_set[:,0].min()-1,stop = x_set[:,0].max()+1, step =0.01),
 np.arange(start = x_set[:,1].min()-1,stop = x_set[:,1].max()+1, step =0.01))
 plt.contourf(x1, x2, classifier.predict(np.array([x1.ravel(), x2.ravel()]).T).reshape(x1.shape),
-alpha = 0.75, cmap = ListedColormap((‘red’, ‘green’)))
+alpha = 0.75, cmap = ListedColormap(('red', 'green')))
 plt.xlim(x1.min(), x1.max())
 plt.ylim(x1.min(), x2.max())
 for i,j in enumerate(np.unique(y_set)):
-plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
-c = ListedColormap((‘red’, ‘green’))(i),label = j)
-plt.title(‘Logistic Regression (Training set)’)
-plt.xlabel(‘Age’)
-plt.ylabel(‘Estimated Salary’)
-plt.show()
+    plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
+    c = ListedColormap(('red', 'green'))(i),label = j)
+    plt.title('Logistic Regression (Training set)')
+    plt.xlabel('Age')
+    plt.ylabel('Estimated')
+    plt.show()
+    
+# Suggested way to plot this from seaborn
+tips["big_tip"] = (tips.tip / tips.total_bill) > .175
+ax = sns.regplot(x="total_bill", y="big_tip", data=tips, logistic=True, n_boot=500, y_jitter=.03)
 
 # Test set plot
 from matplotlib.colors import ListedColormap
@@ -220,32 +226,25 @@ plt.xlabel(‘Age’)
 plt.ylabel(‘Estimated Salary’)
 plt.show()
 
-
-
-
-
 #Evaluating this model using mean squared error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-import numpy as np
-#Training
-print(np.sqrt(mean_squared_error(y_train, y_pred))) #RMSE training set
-print(r2_score(y_train, y_pred)) #R2 training
-#Test
-y_predtest = linearRegressor.predict(X_test)
-print(np.sqrt(mean_squared_error(y_test, y_predtest))) #RMSE test
-print(r2_score(y_test, y_predtest)) #R2 test
+print('Root mean squared error:')
+print(np.sqrt(mean_squared_error(y_test, y_pred))) #RMSE test
+print('------------------------------')
+print('R squared score:')
+print(r2_score(y_test, y_pred)) #R2 test
 
 
 #############################################0
 # Linear regression - might need to do penalised regression because of the amount of correlation in my data
 # Going to try and predict the number of people at each gp surgery,
-from sklearn.linear_model import LinearRegression
-linreg = LinearRegression() #Labelling thefeature
+from sklearn.linear_model import LinearRegression # Want to find the cross validated version
+linreg = LinearRegression()#Labelling thefeature
 linreg.fit(X_train, y_train) # Training the model
-y_pred = linreg.predict(X_train) 
+y_pred = linreg.predict(X_test) 
 
-plt.scatter(y_train, y_pred)
+plt.scatter(y_test, y_pred)
 plt.title('Comparing training data point and the predicted value')
 plt.xlabel('Actual y value')
 plt.ylabel('Predicted y value')
