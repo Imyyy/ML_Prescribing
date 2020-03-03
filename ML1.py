@@ -44,6 +44,7 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
 X_train.drop(['number_of_patients']) # May already be running, need to check 
 print(list(X_train))
+X_train_df = X_train
 # This code doesn't work - going to just keep writing code and will come back to debug this afternoon
     # There will be the same proportion of case-controls in the new dataset as original
 #Scaling:
@@ -53,7 +54,7 @@ scaler.fit(X_train)
 scaler.transform(X_train) 
     #print(scaler.mean_) # Check it scaled normally
 
-# Don't then need to scale the test data, as the model has been fitted
+# Don't then need to scale the test data, as the model has been fitted, and the outcome variable here is binary
     #Check this!!!
     
 #########################################
@@ -188,20 +189,26 @@ plt.show()
 
 # Training set info
 from matplotlib.colors import ListedColormap
-x_set, y_set = x_train, y_train
+#x_set, y_set = X_train, y_train
+x_set = pd.DataFrame.to_numpy(X_train)
+y_set = pd.DataFrame.to_numpy(y_train)
 x1, x2 = np.meshgrid(np.arange(start = x_set[:,0].min()-1,stop = x_set[:,0].max()+1, step =0.01),
 np.arange(start = x_set[:,1].min()-1,stop = x_set[:,1].max()+1, step =0.01))
 plt.contourf(x1, x2, classifier.predict(np.array([x1.ravel(), x2.ravel()]).T).reshape(x1.shape),
-alpha = 0.75, cmap = ListedColormap((‘red’, ‘green’)))
+alpha = 0.75, cmap = ListedColormap(('red', 'green')))
 plt.xlim(x1.min(), x1.max())
 plt.ylim(x1.min(), x2.max())
 for i,j in enumerate(np.unique(y_set)):
-plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
-c = ListedColormap((‘red’, ‘green’))(i),label = j)
-plt.title(‘Logistic Regression (Training set)’)
-plt.xlabel(‘Age’)
-plt.ylabel(‘Estimated Salary’)
-plt.show()
+    plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
+    c = ListedColormap(('red', 'green'))(i),label = j)
+    plt.title('Logistic Regression (Training set)')
+    plt.xlabel('Age')
+    plt.ylabel('Estimated')
+    plt.show()
+    
+# Suggested way to plot this from seaborn
+tips["big_tip"] = (tips.tip / tips.total_bill) > .175
+ax = sns.regplot(x="total_bill", y="big_tip", data=tips, logistic=True, n_boot=500, y_jitter=.03)
 
 # Test set plot
 from matplotlib.colors import ListedColormap
@@ -220,32 +227,25 @@ plt.xlabel(‘Age’)
 plt.ylabel(‘Estimated Salary’)
 plt.show()
 
-
-
-
-
 #Evaluating this model using mean squared error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
-import numpy as np
-#Training
-print(np.sqrt(mean_squared_error(y_train, y_pred))) #RMSE training set
-print(r2_score(y_train, y_pred)) #R2 training
-#Test
-y_predtest = linearRegressor.predict(X_test)
-print(np.sqrt(mean_squared_error(y_test, y_predtest))) #RMSE test
-print(r2_score(y_test, y_predtest)) #R2 test
+print('Root mean squared error:')
+print(np.sqrt(mean_squared_error(y_test, y_pred))) #RMSE test
+print('------------------------------')
+print('R squared score:')
+print(r2_score(y_test, y_pred)) #R2 test
 
 
 #############################################0
 # Linear regression - might need to do penalised regression because of the amount of correlation in my data
 # Going to try and predict the number of people at each gp surgery,
-from sklearn.linear_model import LinearRegression
-linreg = LinearRegression() #Labelling thefeature
+from sklearn.linear_model import LinearRegression # Want to find the cross validated version
+linreg = LinearRegression()#Labelling thefeature
 linreg.fit(X_train, y_train) # Training the model
-y_pred = linreg.predict(X_train) 
+y_pred = linreg.predict(X_test) 
 
-plt.scatter(y_train, y_pred)
+plt.scatter(y_test, y_pred)
 plt.title('Comparing training data point and the predicted value')
 plt.xlabel('Actual y value')
 plt.ylabel('Predicted y value')
@@ -334,22 +334,25 @@ fitted_grid_search_model = grid_search_model.fit(iris_X, iris_y)
 full_model_accuracy =  metrics.accuracy_score(y_test, model_2_y_pred)
 print(f'Accuracy: {full_model_accuracy}')
 
-
-
-#########################################
+##################################################################################
+                                    #CART
+##################################################################################
 #CART - need to then play around with the depth of the tree etc 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
     # Gini classifier
-dt = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='gini')
-dt.fit(X_train, y_train) #Fit dt to the training set
-y_pred = dt.predict(X_test) #Predict the test set labels
-accuracy_score(y_test, y_pred) #Evaluate tets-set accuracy
+dt_md2 = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='gini')
+dt_md2.fit(X_train, y_train) #Fit dt to the training set
+y_pred = dt_md2.predict(X_test) #Predict the test set labels
+accuracy_score(y_test, y_pred) #Evaluate test - set accuracy
 
     # Information gain classifier
-dt = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
+dt_info = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
+dt_info.fit(X_train_df, y_train) #Fit dt to the training set
+y_pred = dt_info.predict(X_test) #Predict the test set labels
+accuracy_score(y_test, y_pred)
 
     #Decision tree for regression
 dt = DecisionTreeRegressor(max_depth=2, random_state=1)
@@ -381,47 +384,17 @@ def plot_tree(graph, feature_names=None, class_names=None):
     graph = graphviz.Source(dot_data)
     
     return graph
-plot_tree(fitted_base_model, iris.feature_names, iris.target_names)
 
-#########################################
-#  SVM
+plot_tree(dt_md2)
+
+
+##################################################################################
+                                    #SVM
+##################################################################################
 # Copied straight from ML practical so going to need some adapting
-    import numpy as np
-import matplotlib.pyplot as plt
-
-# use seaborn plotting defaults
-import seaborn as sns; sns.set()
-
-from sklearn.datasets.samples_generator import make_blobs
-
-# consider two classes of points which are well separated
-X, y = make_blobs(n_samples=50, centers=2,
-                  random_state=0, cluster_std=0.50)
-plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
-plt.show()
-
-# Task 1: Attempt to use linear regression to separate this data using linear regression.
-# Note there are several possibilities which separate the data?     
-# What happens to the classification of point [0.6, 2.1] (or similar)?
-
-xfit = np.linspace(-1, 3.5) # Create a linear space?
-plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn') # Scatter plot
-
-for m, b in [(1, 0.65), (0.5, 1.6), (-0.2, 2.9)]: 
-    plt.plot(xfit, m * xfit + b, '-k')
-    
-plt.plot([0.6], [2.1], 'x', color='red', markeredgewidth=2, markersize=10)    
-
-plt.xlim(-1, 3.5)
-
-plt.show()
-
-# With SVM rather than simply drawing a zero-width line between the 
-# classes, we draw a margin of some width around each line, up to the nearest point. 
+# With SVM rather than simply drawing a zero-width line between the classes, we draw a margin of some width around each line, up to the nearest point. 
 
 # Task 2: Draw the margin around the lines you chose in Task 1.
-
-#%%Cell
 
 # For SVM the line that maximises the margin is the optimal model
 
@@ -457,7 +430,7 @@ def plot_svc_decision_function(model, ax=None):
     ax.set_ylim(ylim)
 
 model = SVC(kernel='linear', C=1E10, gamma = 0.1)
-model.fit(X, y)
+model.fit(X_train, y_train) # Takes a while to fit
 
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
 plot_svc_decision_function(model)
