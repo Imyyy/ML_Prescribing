@@ -44,6 +44,7 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
 X_train.drop(['number_of_patients']) # May already be running, need to check 
 print(list(X_train))
+X_train_df = X_train
 # This code doesn't work - going to just keep writing code and will come back to debug this afternoon
     # There will be the same proportion of case-controls in the new dataset as original
 #Scaling:
@@ -53,7 +54,7 @@ scaler.fit(X_train)
 scaler.transform(X_train) 
     #print(scaler.mean_) # Check it scaled normally
 
-# Don't then need to scale the test data, as the model has been fitted
+# Don't then need to scale the test data, as the model has been fitted, and the outcome variable here is binary
     #Check this!!!
     
 #########################################
@@ -333,22 +334,25 @@ fitted_grid_search_model = grid_search_model.fit(iris_X, iris_y)
 full_model_accuracy =  metrics.accuracy_score(y_test, model_2_y_pred)
 print(f'Accuracy: {full_model_accuracy}')
 
-
-
-#########################################
+##################################################################################
+                                    #CART
+##################################################################################
 #CART - need to then play around with the depth of the tree etc 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
     # Gini classifier
-dt = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='gini')
-dt.fit(X_train, y_train) #Fit dt to the training set
-y_pred = dt.predict(X_test) #Predict the test set labels
-accuracy_score(y_test, y_pred) #Evaluate tets-set accuracy
+dt_md2 = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='gini')
+dt_md2.fit(X_train, y_train) #Fit dt to the training set
+y_pred = dt_md2.predict(X_test) #Predict the test set labels
+accuracy_score(y_test, y_pred) #Evaluate test - set accuracy
 
     # Information gain classifier
-dt = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
+dt_info = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
+dt_info.fit(X_train_df, y_train) #Fit dt to the training set
+y_pred = dt_info.predict(X_test) #Predict the test set labels
+accuracy_score(y_test, y_pred)
 
     #Decision tree for regression
 dt = DecisionTreeRegressor(max_depth=2, random_state=1)
@@ -380,47 +384,17 @@ def plot_tree(graph, feature_names=None, class_names=None):
     graph = graphviz.Source(dot_data)
     
     return graph
-plot_tree(fitted_base_model, iris.feature_names, iris.target_names)
 
-#########################################
-#  SVM
+plot_tree(dt_md2)
+
+
+##################################################################################
+                                    #SVM
+##################################################################################
 # Copied straight from ML practical so going to need some adapting
-    import numpy as np
-import matplotlib.pyplot as plt
-
-# use seaborn plotting defaults
-import seaborn as sns; sns.set()
-
-from sklearn.datasets.samples_generator import make_blobs
-
-# consider two classes of points which are well separated
-X, y = make_blobs(n_samples=50, centers=2,
-                  random_state=0, cluster_std=0.50)
-plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
-plt.show()
-
-# Task 1: Attempt to use linear regression to separate this data using linear regression.
-# Note there are several possibilities which separate the data?     
-# What happens to the classification of point [0.6, 2.1] (or similar)?
-
-xfit = np.linspace(-1, 3.5) # Create a linear space?
-plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn') # Scatter plot
-
-for m, b in [(1, 0.65), (0.5, 1.6), (-0.2, 2.9)]: 
-    plt.plot(xfit, m * xfit + b, '-k')
-    
-plt.plot([0.6], [2.1], 'x', color='red', markeredgewidth=2, markersize=10)    
-
-plt.xlim(-1, 3.5)
-
-plt.show()
-
-# With SVM rather than simply drawing a zero-width line between the 
-# classes, we draw a margin of some width around each line, up to the nearest point. 
+# With SVM rather than simply drawing a zero-width line between the classes, we draw a margin of some width around each line, up to the nearest point. 
 
 # Task 2: Draw the margin around the lines you chose in Task 1.
-
-#%%Cell
 
 # For SVM the line that maximises the margin is the optimal model
 
@@ -456,7 +430,7 @@ def plot_svc_decision_function(model, ax=None):
     ax.set_ylim(ylim)
 
 model = SVC(kernel='linear', C=1E10, gamma = 0.1)
-model.fit(X, y)
+model.fit(X_train, y_train) # Takes a while to fit
 
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
 plot_svc_decision_function(model)
