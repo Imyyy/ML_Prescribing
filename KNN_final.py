@@ -33,17 +33,19 @@ y = final['binary_#_patients'] # Then going to need to make this binary
 X = final #Says this is not defined when I try to run the later code
 X.drop(['binary_#_patients'], axis=1, inplace = True)
 X.drop(['number_of_patients'], axis=1, inplace = True)
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split # TRAINING AND TEST SPLIT
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
-X_train.drop(['number_of_patients']) # May already be running, need to check 
+X_train.drop(['number_of_patients'])
 print(list(X_train))
 X_train_df = X_train
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler() #Only need to scale the train, then apply to the test data
+from sklearn.preprocessing import StandardScaler # SCALING THE DATA
+scaler = StandardScaler()
 scaler.fit(X_train)
 scaler.transform(X_train) 
 
-################# KNN ###################
+###################################################################################
+                            # KNN ROUND 1
+###################################################################################
 from sklearn.neighbors import KNeighborsClassifier 
 knn = KNeighborsClassifier(n_neighbors=5) # Name the knn fitter
 knn.fit(X_train, y_train) # Fitting the model

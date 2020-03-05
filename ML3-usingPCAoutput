@@ -5,9 +5,6 @@ Created on Tue Mar  3 11:43:00 2020
 
 @author: imyyounge
 """
-
-
-
 # Then linear regress this and see what you get - does the model do a better explanation now?
 import os
 import pandas as pd
