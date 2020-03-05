@@ -60,12 +60,9 @@ logreg.get_params()
 accuracy = accuracy_score(y_test,y_pred)
 logreg.score(X_test, y_pred) # Mean accuracy on the given test data and labels
 
-plt.scatter(y_test, y_pred)
-plt.title('Comparing test data point and the predicted value')
-plt.xlabel('Actual y value')
-plt.ylabel('Predicted y value')
-plt.show() # Currently shoes that it is only predicting the answer to be 1
-
+###################################################################################
+                            # OUTPUT METRICS
+###################################################################################
 #Evaluating this model using mean squared error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
@@ -80,5 +77,25 @@ from sklearn.metrics import confusion_matrix, classification_report
 print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
-# Summary: Can get high accuracy just by fitting them
+###################################################################################
+                            # PLOTS
+###################################################################################
+
+df = pd.DataFrame({'y_pred': y_pred, 'y_test': y_test,}) # Define a dataframe
+import seaborn as sns
+sns.regplot(x='y_test', y='y_pred', data = df, logistic=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
