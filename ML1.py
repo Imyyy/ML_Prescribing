@@ -89,83 +89,6 @@ X_train_pca.head()
 #### Plots from PCA - see jupyter
 
 #############################################
-# KNN
-from sklearn.neighbors import KNeighborsClassifier 
-# Unsupervised: NearestNeighbors
-knn = KNeighborsClassifier(n_neighbors=5) # Name the knn fitter
-knn.fit(X_train, y_train) # Fitting the model
-y_pred = knn.predict(X_test) # Creating the predictions for the first 100 rows test set
-
-from sklearn.metrics import classification_report, confusion_matrix
-print(confusion_matrix(y_test, y_pred))
-print(classification_report(y_test, y_pred))
-
-
-# Trying to plot the number of k values against the amount of errror for that value
-error = []
-for i in range(1, 40):
-    knn = KNeighborsClassifier(n_neighbors=i)
-    knn.fit(X_train, y_train)
-    pred_i = knn.predict(X_test)
-    error.append(np.mean(pred_i != y_test))
-
-plt.figure(figsize=(12, 6))
-plt.plot(range(1, 40), error, color='red', linestyle='dashed', marker='o',
-         markerfacecolor='blue', markersize=10)
-plt.title('Error Rate K Value')
-plt.xlabel('K Value')
-plt.ylabel('Mean Error')
-
-# Need to make a meshgrid to flow through the areas
-
-
-# There is an arror here somewhere, need to fix it at some point
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import VotingClassifier
-
-# Loading some example data
-X = X_train
-y = y_train
-
-# Training classifiers
-clf1 = DecisionTreeClassifier(max_depth=4)
-clf2 = KNeighborsClassifier(n_neighbors=7)
-clf3 = SVC(gamma=.1, kernel='rbf', probability=True)
-eclf = VotingClassifier(estimators=[('dt', clf1), ('knn', clf2),
-                                    ('svc', clf3)],
-                        voting='soft', weights=[2, 1, 2])
-
-clf1.fit(X, y)
-clf2.fit(X, y)
-clf3.fit(X, y)
-eclf.fit(X, y)
-
-# Plotting decision regions
-x_min, x_max = X.iloc[:, 0].min() - 1, X.iloc[:, 0].max() + 1
-y_min, y_max = y.min() - 1, y.max() + 1
-xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
-                     np.arange(y_min, y_max, 0.1))
-X = pd.DataFrame.to_numpy(X)
-y = pd.DataFrame.to_numpy(y)
-
-f, axarr = plt.subplots(2, 2, sharex='col', sharey='row', figsize=(10, 8))
-
-for idx, clf, tt in zip(product([0, 1], [0, 1]),
-                        [clf1, clf2, clf3, eclf],
-                        ['Decision Tree (depth=4)', 'KNN (k=7)',
-                         'Kernel SVM', 'Soft Voting']):
-
-    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
-
-    axarr[idx[0], idx[1]].contourf(xx, yy, Z, alpha=0.4)
-    axarr[idx[0], idx[1]].scatter(X[:, 0], X[:, 1], c=y,
-                                  s=20, edgecolor='k')
-    axarr[idx[0], idx[1]].set_title(tt)
-
-plt.show()
 
 
 #############################################0
@@ -334,58 +257,6 @@ fitted_grid_search_model = grid_search_model.fit(iris_X, iris_y)
 full_model_accuracy =  metrics.accuracy_score(y_test, model_2_y_pred)
 print(f'Accuracy: {full_model_accuracy}')
 
-##################################################################################
-                                    #CART
-##################################################################################
-#CART - need to then play around with the depth of the tree etc 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-
-    # Gini classifier
-dt_md2 = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='gini')
-dt_md2.fit(X_train, y_train) #Fit dt to the training set
-y_pred = dt_md2.predict(X_test) #Predict the test set labels
-accuracy_score(y_test, y_pred) #Evaluate test - set accuracy
-
-    # Information gain classifier
-dt_info = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
-dt_info.fit(X_train_df, y_train) #Fit dt to the training set
-y_pred = dt_info.predict(X_test) #Predict the test set labels
-accuracy_score(y_test, y_pred)
-
-    #Decision tree for regression
-dt = DecisionTreeRegressor(max_depth=2, random_state=1)
-mse_dt = MSE(y_test, y_pred)
-rmse_dt = mse_dt**(1/2)
-print(rmse_dt)
-
-    # Then copy the code over for dealing with bias and variance issues in regression decision trees
-    
-    # Voting classifier if needed
-    
-# Plotting the resulting tree 
-from sklearn.tree import export_graphviz
-from sklearn import metrics
-import graphviz 
-
-    # Helper function to plot the decision tree. This uses the graphviz library.
-def plot_tree(graph, feature_names=None, class_names=None):
-    '''
-    This method takes a DecisionTreeClassifier object, along with a list of feature names and target names
-    and plots a tree. The feature names and class names can be left empty; they are just there for labelling 
-    '''
-    dot_data = export_graphviz(graph, out_file=None, 
-                      feature_names=feature_names,  
-                      class_names=class_names,  
-                      filled=True, rounded=True,  
-                      special_characters=True) 
-    
-    graph = graphviz.Source(dot_data)
-    
-    return graph
-
-plot_tree(dt_md2)
 
 
 ##################################################################################
@@ -435,8 +306,6 @@ model.fit(X_train, y_train) # Takes a while to fit
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
 plot_svc_decision_function(model)
 plt.show()
-
-#%% 
 
 # Task 4: Change the number of points in the dataset using X = X[:N] and y = y[:N]
 # and build the classifier again using a linear kernel
@@ -567,7 +436,8 @@ plot_svc_decision_function(model)
 plt.show()
 
 
-
+## Variable importance plot for random forest 
+    # Which one fo the variables is at the top the most
     
 
 

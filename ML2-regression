@@ -33,16 +33,16 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 print(list(X_train))
     # Check there will be the same proportion of case-controls in the new dataset as original
 
-#Scaling:
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler() # Only need to scale the train, then apply to the test data
-scaler.fit(X_train)
-scaler.transform(X_train)  # Think this outputs an array
+ # Think this outputs an array
 
 ###################################################################################
                                     #REGRESSION
 ###################################################################################
-
+#Scaling:
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler() # Only need to scale the train, then apply to the test data
+scaler.fit(X_train)
+scaler.transform(X_train) 
 # Applying the Linear regressor
 from sklearn.modelselection import LinearRegression
 regress = LinearRegression()
@@ -72,35 +72,5 @@ sns.regplot(x="Actual-log", y="Predicted-log", data=reg_output)
 ###################################################################################
                             # DECISION TREE REGRESSOR
 ###################################################################################
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_squared_error as MSE
-dt = DecisionTreeRegressor(max_depth=2, random_state=1)
-mse_dt = MSE(y_test, y_pred)
-rmse_dt = mse_dt**(1/2)
-print(rmse_dt)
-
-from sklearn.tree import export_graphviz
-from sklearn import metrics
-import graphviz 
-
-    # Helper function to plot the decision tree. This uses the graphviz library.
-def plot_tree(graph, feature_names=None, class_names=None):
-    '''
-    This method takes a DecisionTreeClassifier object, along with a list of feature names and target names
-    and plots a tree. The feature names and class names can be left empty; they are just there for labelling 
-    '''
-    dot_data = export_graphviz(graph, out_file=None, 
-                      feature_names=feature_names,  
-                      class_names=class_names,  
-                      filled=True, rounded=True,  
-                      special_characters=True) 
-    
-    graph = graphviz.Source(dot_data)
-    
-    return graph
-
-plot_tree(dt)
-
-    # Then copy the code over for dealing with bias and variance issues in regression decision trees
 
 
