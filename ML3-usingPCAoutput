@@ -5,9 +5,6 @@ Created on Tue Mar  3 11:43:00 2020
 
 @author: imyyounge
 """
-
-
-
 # Then linear regress this and see what you get - does the model do a better explanation now?
 import os
 import pandas as pd
@@ -30,26 +27,40 @@ X.drop(['number_of_patients'], axis=1, inplace = True)
 
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
-print(list(X_train))
-    # Check there will be the same proportion of case-controls in the new dataset as original
 
-#Scaling:
 from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler() # Only need to scale the train, then apply to the test data
 scaler.fit(X_train)
 scaler.transform(X_train) 
 
-#PCA
+#########################################################################
+                            # FITTING PCA
+#########################################################################
 from sklearn.decomposition import PCA
-pca = PCA(n_components=2, random_state=42)
-pca.fit(X_train)
+pca = PCA(n_components=2, random_state=42) #Initialise the PCA, with 2 components
+pca.fit(X_train) # Fit the PCA from X_train 
 print(pca.explained_variance_ratio_)
 print(pca.explained_variance_ratio_.cumsum()) # PCA
 X_train_pca = pca.transform(X_train) #Need to do the same idea to training data # Create a pandas dataframe
 X_train_pca =  pd.DataFrame(X_train_pca)
-#X_train_pca.columns = ['PC1','PC2', 'PC3', 'PC4', 'PC5']
+X_train_pca.columns = ['PC1','PC2']
+X_test_pca = pca.transform(X_test) # Transform the X_test set test
+X_test_pca =  pd.DataFrame(X_test_pca)
+X_test_pca.columns = ['PC1','PC2']
 
-# Applying linear regression to the PCA output
+
+
+
+#########################################################################
+                            # PLOTTING THE OUTPUT
+#########################################################################
+sns.regplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], fit_reg=False)
+
+sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0])
+
+#########################################################################
+                            # REGRESSION
+#########################################################################
 from sklearn.linear_model import LinearRegression
 regress = LinearRegression()
 regress.fit(X_train_pca, y_train)
@@ -61,7 +72,9 @@ y_pred = regress.predict(X_test) # Make predictions using this model
 reg_output = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
 print(reg_output.head(15))
 
-# Evaluating the regression output
+#########################################################################
+                        # EVALUATING REGRESSION
+#########################################################################
 from sklearn import metrics
 print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
 print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
@@ -73,3 +86,12 @@ reg_output['Predicted-log'] = np.log(reg_output['Predicted'])
 
 sns.regplot(x="Actual", y="Predicted", data=reg_output)
 sns.regplot(x="Actual-log", y="Predicted-log", data=reg_output)
+
+
+
+
+
+
+
+
+

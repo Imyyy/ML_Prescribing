@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Mar  2 17:31:07 2020
+
+@author: imyyounge
+"""
+
+################################################################################
+###                         REGRESSION                                       ###
+################################################################################
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') 
+final = pd.read_csv('final.csv') # Correction: Need to use the dataset outputted by categorical_and_exclusion
+def rename_unname(df):
+    for col in df:
+        if col.startswith('Unnamed'):
+            df.drop(col,axis=1, inplace=True)
+rename_unname(final)
+print(list(final))
+final.drop(['left_parent_date'], axis=1, inplace=True) #Drop the columns with NAs so that hopefully things work later
+y = final['number_of_patients'] # Then going to need to make this binary
+X = final
+X.drop(['number_of_patients'], axis=1, inplace = True)
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
+print(list(X_train))
+    # Check there will be the same proportion of case-controls in the new dataset as original
+
+ # Think this outputs an array
+
+
+
