@@ -36,11 +36,12 @@ final['binary_#_patients'] = final.apply(f, axis=1)
 y = final['binary_#_patients'] # Then going to need to make this binary
 X = final #Says this is not defined when I try to run the later code
 X.drop(['binary_#_patients'], axis=1, inplace = True)
-
+X.drop(['number_of_patients'], axis=1, inplace = True)
+        
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
-X_train.drop(['number_of_patients']) # May already be running, need to check 
 print(list(X_train))
+print(list(X_test))
 X_train_df = X_train
 
 from sklearn.preprocessing import StandardScaler
@@ -77,16 +78,37 @@ from sklearn.metrics import confusion_matrix, classification_report
 print(confusion_matrix(y_test, y_pred))
 print(classification_report(y_test, y_pred))
 
+# ROC curve
+from sklearn.metrics import roc_curve
+y_pred_prob = logreg.predict_proba(X_test)
+    # Returns an array with two colums - we choose the second column = p(predicted values =1)
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob) # Fpr = true positive
+plt.plot(fpr, tpr, label = 'Logisitic Regression')
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('Logistic Regression ROC Curve')
+plt.show()
+
+# Area under the ROC curve (AUC)
+    # Larger area -> better model
+from sklearn.metrics import roc_auc_score
+y_pred_prob = logreg.predict_proba(X_test)[:,1]
+auc = roc_auc_score(y_test, y_pred_prob)
+print(auc)
+
 ###################################################################################
                             # PLOTS
 ###################################################################################
-
+# Plotting the classification
 df = pd.DataFrame({'y_pred': y_pred, 'y_test': y_test,}) # Define a dataframe
 import seaborn as sns
 sns.regplot(x='y_test', y='y_pred', data = df, logistic=True)
 
-
-
+# ROC curve
+plt.plot(fpr,tpr,label="data 1, auc=" + str(auc))
+plt.plot([0, 1], [0, 1], color = 'black', linewidth = 2)
+plt.legend(loc=4)
+plt.show()
 
 
 

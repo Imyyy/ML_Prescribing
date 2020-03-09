@@ -104,4 +104,4 @@ print('Voting classifier: {.3f}'.format(accuracy_score(y_test, y_pred)))
 
 ###### ENSEMBLE LEARNING WITH A CART # Where am I going to manage to do this in my code?
 
-
+##### Then want to how a feature selection chart, for which one is put at the top of the tree most often 
