@@ -101,25 +101,30 @@ final.drop(["date_close"], axis=1, inplace = True)
 # Dealing with categorical columns
 pres.drop(["address_2", "status_code", "subtype", "organisation_code", "postcode", "primary_care_organisation_type", "address_3", "bnf.chemical", "bnf.letters", "bnf.code", "practice", "ons_ccg_code", "sex", "age"], axis=1, inplace = True) 
 
-final = pd.DataFrame(pres)
 
-final['ccg_code1'] = final.groupby('ccg_code').ngroup()
-final['high_level_health_geography1'] = final.groupby('high_level_health_geography').ngroup()
-final['commissioner1'] = final.groupby('commissioner').ngroup()
-final['sha1'] = final.groupby('sha').ngroup()
-final['bnf.name1'] = final.groupby('bnf.name').ngroup()
+final = pd.DataFrame(pres)
+final.to_csv("Combined_NHS_data2.csv")
+
+#final['ccg_code1'] = final['ccg_code'].astype("category").cat.codes
+#final['high_level_health_geography1'] = final.groupby('high_level_health_geography').ngroup()
+#final['commissioner1'] = final.groupby('commissioner').ngroup()
+#final['sha1'] = final.groupby('sha').ngroup()
+#final['bnf.name1'] = final.groupby('bnf.name').ngroup()
 final['e8...1'] = final.groupby('e8...').ngroup()
 
 #Then drop the old columns
-final.drop(["ccg_code", "type", "ccg/pct", "high_level_health_geography", "sha", "bnf.name", "commissioner", 'e8...'], axis=1, inplace = True)
+#final.drop(["ccg_code", "type", "ccg/pct", "sha", "bnf.name", "commissioner", 'e8...'], axis=1, inplace = True)
 
 # One hot encoding
 print(final.shape)
 print('-'*20)
 final = pd.concat([final, pd.get_dummies(final['area'])], 1) # Trying this tactic with status_code
 print(final.shape)
+final = pd.concat([final, pd.get_dummies(final['high_level_health_geography'])], 1)
 print('-'*20)
 final = pd.concat([final, pd.get_dummies(final['national_grouping'])], 1)
+final = pd.concat([final, pd.get_dummies(final['commissioner'])], 1)
+final = pd.concat([final, pd.get_dummies(final['sha'])], 1)
 print('-'*20)
 print(list(final.columns))  # Can see all the column names added on
 final.drop(["area", "national_grouping"], axis=1, inplace = True)
@@ -128,8 +133,12 @@ final['bnf.chapter'] = pd.to_numeric(final['bnf.chapter'])
 
 print(final.info()) 
 
-import csv 
-final.to_csv("final.csv")
+final.to_csv("final1.csv")
+
+final['e8...1'] = final.groupby('e8...').ngroup()
+final.drop["ccg_code"]
+
+final.to_csv("final2.csv")
 
 
 

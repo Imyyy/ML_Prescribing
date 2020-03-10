@@ -64,18 +64,21 @@ knn_cv_results.to_csv("Knn gridsearch parameter results")
 knn_best_params = grid.best_params_
 knn_best_params
 
-# Then output the best features into this model, and fit it -> see the parameters and saving how to plot them
-knn = KNeighborsClassifier() 
-knn_for_visualisation = knn(knn_best_params) # fit kmeans object to data
-#kmeans.fit(X_train, y_train)
-#kmeans_cluster_centres = print(kmeans.cluster_centers_)
-
 # Trying to plot the number of k values against the amount of errror for that value
 plt.figure(figsize=(12, 6))
 plt.plot(range(1, 40), error, color='grey', linestyle='dashed', marker='o', markerfacecolor='blue', markersize=10)
 plt.title('Error Rate K Value')
 plt.xlabel('K Value')
 plt.ylabel('Mean Error')
+###################################################################################
+                            # KNN BEST PARAMS
+###################################################################################
+
+# Then output the best features into this model, and fit it -> see the parameters and saving how to plot them
+knn = KNeighborsClassifier() 
+knn_for_visualisation = knn(knn_best_params) # fit kmeans object to data
+#kmeans.fit(X_train, y_train)
+#kmeans_cluster_centres = print(kmeans.cluster_centers_)
 
 ###################################################################################
                             # PLOTTING ROUND 2
