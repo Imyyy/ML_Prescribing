@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') 
+os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') # Comment this out for the HPC
 final = pd.read_csv('final.csv') # Correction: Need to use the dataset outputted by categorical_and_exclusion
 def rename_unname(df):
     for col in df:
@@ -39,7 +39,9 @@ scaler.transform(X_train)
 from sklearn.decomposition import PCA
 pca = PCA(n_components=3, random_state=42) #Initialise the PCA, with 2 components
 pca.fit(X_train) # Fit the PCA from X_train 
+print("PCA Explained variance ratio")
 print(pca.explained_variance_ratio_)
+print("Cumulative PCA Explained variance ratio")
 print(pca.explained_variance_ratio_.cumsum()) # PCA
 X_train_pca = pca.transform(X_train) #Need to do the same idea to training data # Create a pandas dataframe
 X_train_pca =  pd.DataFrame(X_train_pca)
@@ -53,7 +55,7 @@ X_test_pca.columns = ['PC1','PC2', 'PC3']
 #########################################################################
 sns.regplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], fit_reg=False)
 
-sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0])
+sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0]) # Get kernel density estimation plot
 
 #########################################################################
                             # REGRESSION
@@ -61,21 +63,22 @@ sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-5
 from sklearn.linear_model import LinearRegression
 regress = LinearRegression()
 regress.fit(X_train_pca, y_train)
+print("Regression intercept")
 print(regress.intercept_)
-coeff_df = pd.DataFrame(regress.coef_, columns=['Coefficient']) # get an issue here, not sure why 
-coeff_df #Look at the coefficients from the model
+pca_regression_coefficients = pd.DataFrame(regress.coef_, columns=['Coefficient']) # get an issue here, not sure why 
+pca_regression_coefficients #Look at the coefficients from the model
 
-y_pred = regress.predict(X_test) # Make predictions using this model
-reg_output = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
+y_pred_pca = regress.predict(X_test_pca) # Make predictions using this model
+reg_output = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred_pca})
 print(reg_output.head(15))
 
 #########################################################################
                         # EVALUATING REGRESSION
 #########################################################################
 from sklearn import metrics
-print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
-print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
-print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred_pca))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred_pca))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred_pca)))
 
 # Plot the outcome of the actual and predicted y values
 reg_output['Actual-log'] = np.log(reg_output['Actual'])
@@ -84,45 +87,5 @@ reg_output['Predicted-log'] = np.log(reg_output['Predicted'])
 sns.regplot(x="Actual", y="Predicted", data=reg_output)
 sns.regplot(x="Actual-log", y="Predicted-log", data=reg_output)
 
-
-###################################################################################
-                            # PLOTTING ROUND 2
-###################################################################################
-from mpl_toolkits.mplot3d import Axes3D
-
-from sklearn.cluster import KMeans
-from sklearn import datasets
-
-np.random.seed(5)
-
-iris = datasets.load_iris()
-X = X_train_pca
-y = y_train
-estimators = [('k_means_iris_8', KMeans(n_clusters=4)),
-              ('k_means_iris_3', KMeans(n_clusters=3)),
-              ('k_means_iris_bad_init', KMeans(n_clusters=2))]
-
-fignum = 1
-titles = ['8 clusters', '3 clusters', '3 clusters, bad initialization']
-for name, est in estimators:
-    fig = plt.figure(fignum, figsize=(4, 3))
-    ax = Axes3D(fig, rect=[0, 0, .95, 1])
-    est.fit(X)
-    labels = est.labels_
-
-    ax.scatter(X['PC1'], X['PC2'], X['PC3'],
-               c=labels.astype(np.float), edgecolor='k')
-
-    ax.w_xaxis.set_ticklabels([])
-    ax.w_yaxis.set_ticklabels([])
-    ax.w_zaxis.set_ticklabels([])
-    ax.set_xlabel('PC1')
-    ax.set_ylabel('PC2')
-    ax.set_zlabel('PC3')
-    ax.set_title(titles[fignum - 1])
-    ax.dist = 12
-    fignum = fignum + 1
-
-# Need to go through and altr the numbers of clusters
 
 
