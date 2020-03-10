@@ -97,7 +97,10 @@ clf2.fit(X, y)
 clf3.fit(X, y)
 eclf.fit(X, y)
 
-# Plotting decision regions
+
+###################################################################################
+                            # PLOTTING DECISION REGIONS
+###################################################################################
 x_min, x_max = X.iloc[:, 0].min() - 1, X.iloc[:, 0].max() + 1
 y_min, y_max = y.min() - 1, y.max() + 1
 xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1),
@@ -121,6 +124,74 @@ for idx, clf, tt in zip(product([0, 1], [0, 1]),
     axarr[idx[0], idx[1]].set_title(tt)
 
 plt.show()
+
+###################################################################################
+                            # PLOTTING ROUND 2
+###################################################################################
+
+from mpl_toolkits.mplot3d import Axes3D
+
+from sklearn.cluster import KMeans
+from sklearn import datasets
+
+np.random.seed(5)
+
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+estimators = [('k_means_iris_8', KMeans(n_clusters=8)),
+              ('k_means_iris_3', KMeans(n_clusters=3)),
+              ('k_means_iris_bad_init', KMeans(n_clusters=3, n_init=1))]
+
+fignum = 1
+titles = ['8 clusters', '3 clusters', '3 clusters, bad initialization']
+for name, est in estimators:
+    fig = plt.figure(fignum, figsize=(4, 3))
+    ax = Axes3D(fig, rect=[0, 0, .95, 1], elev=48, azim=134)
+    est.fit(X)
+    labels = est.labels_
+
+    ax.scatter(X[:, 3], X[:, 0], X[:, 2],
+               c=labels.astype(np.float), edgecolor='k')
+
+    ax.w_xaxis.set_ticklabels([])
+    ax.w_yaxis.set_ticklabels([])
+    ax.w_zaxis.set_ticklabels([])
+    ax.set_xlabel('Petal width')
+    ax.set_ylabel('Sepal length')
+    ax.set_zlabel('Petal length')
+    ax.set_title(titles[fignum - 1])
+    ax.dist = 12
+    fignum = fignum + 1
+
+# Edited version of code above
+X = X_train
+y = y_train
+estimators = [('k_means_iris_8', KMeans(n_clusters=8)),
+              ('k_means_iris_6', KMeans(n_clusters=6)),
+              ('k_means_iris_4', KMeans(n_clusters=4)),
+              ('k_means_iris_2', KMeans(n_clusters=2))]
+
+fignum = 1
+titles = ['8 clusters', '6 clusters', '4 clusters', '2 clusters']
+for name, est in estimators:
+    fig = plt.figure(fignum, figsize=(4, 4))
+    ax = Axes3D(fig, rect=[0, 0, .95, 1])
+    est.fit(X)
+    labels = est.labels_
+
+    ax.scatter(X['date_open'], X['ccg_code1'], X['items'],
+               c=labels.astype(np.float), edgecolor='k')
+
+    ax.w_xaxis.set_ticklabels([])
+    ax.w_yaxis.set_ticklabels([])
+    ax.w_zaxis.set_ticklabels([])
+    ax.set_xlabel('Date opened')
+    ax.set_ylabel('Date joined parent organisation')
+    ax.set_zlabel('Items')
+    ax.set_title(titles[fignum - 1])
+    ax.dist = 12
+    fignum = fignum + 1
 
 
 ######################## Unsupervised KNN #######################

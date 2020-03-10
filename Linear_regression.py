@@ -40,7 +40,7 @@ from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler() # Only need to scale the train, then apply to the test data
 scaler.fit(X_train)
 scaler.transform(X_train) 
-# Applying the Linear regressor
+
 from sklearn.modelselection import LinearRegression
 regress = LinearRegression()
 regress.fit(X_train, y_train)
@@ -160,3 +160,7 @@ fitted_grid_search_model = grid_search_model.fit(iris_X, iris_y)
 #Accuracy score
 full_model_accuracy =  metrics.accuracy_score(y_test, model_2_y_pred)
 print(f'Accuracy: {full_model_accuracy}')
+
+#### THINK I NEED TO DO A PLS SCORE HERE - want to not use the correlated one
+
+

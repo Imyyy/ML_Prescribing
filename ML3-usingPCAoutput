@@ -37,19 +37,16 @@ scaler.transform(X_train)
                             # FITTING PCA
 #########################################################################
 from sklearn.decomposition import PCA
-pca = PCA(n_components=2, random_state=42) #Initialise the PCA, with 2 components
+pca = PCA(n_components=3, random_state=42) #Initialise the PCA, with 2 components
 pca.fit(X_train) # Fit the PCA from X_train 
 print(pca.explained_variance_ratio_)
 print(pca.explained_variance_ratio_.cumsum()) # PCA
 X_train_pca = pca.transform(X_train) #Need to do the same idea to training data # Create a pandas dataframe
 X_train_pca =  pd.DataFrame(X_train_pca)
-X_train_pca.columns = ['PC1','PC2']
+X_train_pca.columns = ['PC1','PC2', 'PC3']
 X_test_pca = pca.transform(X_test) # Transform the X_test set test
 X_test_pca =  pd.DataFrame(X_test_pca)
-X_test_pca.columns = ['PC1','PC2']
-
-
-
+X_test_pca.columns = ['PC1','PC2', 'PC3']
 
 #########################################################################
                             # PLOTTING THE OUTPUT
@@ -88,10 +85,44 @@ sns.regplot(x="Actual", y="Predicted", data=reg_output)
 sns.regplot(x="Actual-log", y="Predicted-log", data=reg_output)
 
 
+###################################################################################
+                            # PLOTTING ROUND 2
+###################################################################################
+from mpl_toolkits.mplot3d import Axes3D
 
+from sklearn.cluster import KMeans
+from sklearn import datasets
 
+np.random.seed(5)
 
+iris = datasets.load_iris()
+X = X_train_pca
+y = y_train
+estimators = [('k_means_iris_8', KMeans(n_clusters=4)),
+              ('k_means_iris_3', KMeans(n_clusters=3)),
+              ('k_means_iris_bad_init', KMeans(n_clusters=2))]
 
+fignum = 1
+titles = ['8 clusters', '3 clusters', '3 clusters, bad initialization']
+for name, est in estimators:
+    fig = plt.figure(fignum, figsize=(4, 3))
+    ax = Axes3D(fig, rect=[0, 0, .95, 1])
+    est.fit(X)
+    labels = est.labels_
 
+    ax.scatter(X['PC1'], X['PC2'], X['PC3'],
+               c=labels.astype(np.float), edgecolor='k')
+
+    ax.w_xaxis.set_ticklabels([])
+    ax.w_yaxis.set_ticklabels([])
+    ax.w_zaxis.set_ticklabels([])
+    ax.set_xlabel('PC1')
+    ax.set_ylabel('PC2')
+    ax.set_zlabel('PC3')
+    ax.set_title(titles[fignum - 1])
+    ax.dist = 12
+    fignum = fignum + 1
+
+# Need to go through and altr the numbers of clusters
 
 
