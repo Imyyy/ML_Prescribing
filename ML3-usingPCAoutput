@@ -57,11 +57,32 @@ sns.regplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], fit_reg=False)
 
 sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0]) # Get kernel density estimation plot
 
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(X_train_pca['PC1'], X_train_pca['PC2'], X_train_pca['PC3'], c='blue', s=60)
+ax.view_init(30, 30)
+plt.show()
+
+#Plot amount of variance explained
+explained = pca.explained_variance_ratio_.cumsum()
+explained = np.array(explained)
+PC = [1, 2, 3]
+PC = np.array(PC)
+df = pd.DataFrame['PC', 'explained']
+df = pd.DataFrame({'PC': PC, 'explained': list(explained)}, columns=['PC', 'explained'])
+
+
+
+sns.lineplot(x=PC, y=explained, data=df)
+sns.plt.ylim(0, 1)
+sns.plt.show()
 #########################################################################
                             # REGRESSION
 #########################################################################
 from sklearn.linear_model import LinearRegression
 regress = LinearRegression()
+
 regress.fit(X_train_pca, y_train)
 print("Regression intercept")
 print(regress.intercept_)

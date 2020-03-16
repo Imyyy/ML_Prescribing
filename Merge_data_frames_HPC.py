@@ -81,7 +81,6 @@ print(list(final.columns))
 print('-'*20)
 print(final.shape)
 
-import csv
 final.to_csv("Combined_NHS_data.csv")
     
 pres = pd.DataFrame(final)

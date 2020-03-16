@@ -82,8 +82,22 @@ accuracy_score(y_test, y_pred)
 plot_tree(toplotbest)
 
     
-    
-    
+from sklearn.metrics import roc_curve
+y_pred_prob = toplotbest.predict_proba(X_test) # Returns an array with two colums - we choose the second column = p(predicted values =1)
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob[:,1]) # Fpr = true positive
+plt.plot(fpr, tpr, label = 'Logistic Regression ROC Curve')
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('DTC Curve')
+plt.show()
+plt.savefig('DecisionTreeClassifierROC.png')
+
+from sklearn.metrics import roc_auc_score
+y_pred_prob = toplotbest.predict_proba(X_test)[:,1]
+auc = roc_auc_score(y_test, y_pred_prob)
+print(auc)
+
+
     # Then copy the code over for dealing with bias and variance issues in regression decision trees
     
     # Voting classifier if needed

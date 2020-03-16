@@ -87,21 +87,20 @@ knn_for_visualisation = knn(knn_best_params) # fit kmeans object to data
 from mpl_toolkits.mplot3d import Axes3D
 
 from sklearn.cluster import KMeans
-from sklearn import datasets
 
 np.random.seed(5)
 
 # Edited version of code above
 X = X_train
+knn = KNeighborsClassifier() 
 y = y_train
-estimators = [('k_means_iris_8', KMeans(n_clusters=8)),
-              ('k_means_iris_7', KMeans(n_clusters=7)),
-              ('k_means_iris_6', KMeans(n_clusters=6)),
-              ('k_means_iris_4', KMeans(n_clusters=4)),
-              ('k_means_iris_2', KMeans(n_clusters=2))]
+estimators = [('k_means_iris_8', knn(n_neighbors=5)),
+              ('k_means_iris_7', knn(n_neighbors=4)),
+              ('k_means_iris_6', knn(n_clusters=3)),
+              ('k_means_iris_4', knn(n_clusters=2))]
 
 fignum = 1
-titles = ['8 clusters', '6 clusters', '4 clusters', '2 clusters']
+titles = ['5 clusters', '4 clusters', '3 clusters', '2 clusters']
 for name, est in estimators:
     fig = plt.figure(fignum, figsize=(4, 4))
     ax = Axes3D(fig, rect=[0, 0, .95, 1])

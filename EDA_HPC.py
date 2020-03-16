@@ -64,9 +64,9 @@ sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
 list_labels = ('Date practice opened', 'Number of patients', 'Date of joining organisation', 'Date of leaving parent organisation',
                'Number of items', 'Net ingredient cost', 'Actual cost', 'Quantity given in prescriptions', 
                'BNF chapter', 'BNF section', 'BNF paragraph', 'CCG', 'High level health geography', 'Commissioner', 'SHA', 
-               'BNF Name', 'Practice identifier')
-plt.xticks(np.arange(17), list_labels) # Change the x axis labels to actual names
-plt.yticks(np.arange(17), list_labels ) # Change the y axis labels
+               'BNF Name', 'Practice identifier', 'log items', 'log quantity')
+plt.xticks(np.arange(19), list_labels) # Change the x axis labels to actual names
+plt.yticks(np.arange(19), list_labels) # Change the y axis labels
 plot_file_name="Correlation_matrix.jpg" 
 plt.savefig(plot_file_name,format='jpeg', dpi=100)
 
