@@ -20,7 +20,7 @@ def rename_unname(df):
         if col.startswith('Unnamed'):
             df.drop(col,axis=1, inplace=True)
 rename_unname(final)
-print(list(final))
+#print(list(final))
 final.drop(['left_parent_date'], axis=1, inplace=True)
 def f(row):
     if row['number_of_patients'] < 3000:
@@ -37,7 +37,7 @@ X.drop(['binary_#_patients'], axis=1, inplace = True)
 X.drop(['number_of_patients'], axis=1, inplace = True)
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
-X_train.drop(['number_of_patients']) # May already be running, need to check 
+
 print(list(X_train))
 X_train_df = X_train
 from sklearn.preprocessing import StandardScaler
@@ -60,16 +60,43 @@ y_pred = dt_md2.predict(X_test) #Predict the test set labels
 accuracy_score(y_test, y_pred) #Evaluate test - set accuracy
 
     # Information gain classifier
-dt_info = DecisionTreeClassifier(max_depth=2, random_state=1) #Check that defauilt is information gain
-dt_info.fit(X_train_df, y_train) #Fit dt to the training set
-y_pred = dt_info.predict(X_test) #Predict the test set labels
-accuracy_score(y_test, y_pred)
+#dt_info = DecisionTreeClassifier(max_depth=2, random_state=1, criterion='info') #Check that defauilt is information gain
+#dt_info.fit(X_train_df, y_train) #Fit dt to the training set
+#y_pred = dt_info.predict(X_test) #Predict the test set labels
+#accuracy_score(y_test, y_pred)
 
-    #Decision tree for regression
-dt = DecisionTreeRegressor(max_depth=2, random_state=1)
-mse_dt = MSE(y_test, y_pred)
-rmse_dt = mse_dt**(1/2)
-print(rmse_dt)
+# Grid searching this
+from sklearn.model_selection import GridSearchCV
+param_grid = {'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'min_samples_split': [2, 3, 4, 5]} # Testing 5, 10 and 20, could also put a range in this section
+grid = GridSearchCV(DecisionTreeClassifier(), param_grid, cv = None)#takes a dictionary of parameters and values to try out, and a clasfier instance
+grid.fit(X_train,y_train) # In-sample acuracy is the accuracy when applied to the training data
+grid.cv_results_
+grid.best_estimator_
+grid.best_params_
+
+# Plot the classificaiton tree with the best parameters
+toplotbest = DecisionTreeClassifier(max_depth=10, random_state=1, min_samples_split=2)
+toplotbest.fit(X_train, y_train) #Fit dt to the training set
+y_pred = toplotbest.predict(X_test) #Predict the test set labels
+accuracy_score(y_test, y_pred) 
+plot_tree(toplotbest)
+
+    
+from sklearn.metrics import roc_curve
+y_pred_prob = toplotbest.predict_proba(X_test) # Returns an array with two colums - we choose the second column = p(predicted values =1)
+fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob[:,1]) # Fpr = true positive
+plt.plot(fpr, tpr, label = 'Logistic Regression ROC Curve')
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('DTC Curve')
+plt.show()
+plt.savefig('DecisionTreeClassifierROC.png')
+
+from sklearn.metrics import roc_auc_score
+y_pred_prob = toplotbest.predict_proba(X_test)[:,1]
+auc = roc_auc_score(y_test, y_pred_prob)
+print(auc)
+
 
     # Then copy the code over for dealing with bias and variance issues in regression decision trees
     

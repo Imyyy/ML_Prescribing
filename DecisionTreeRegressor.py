@@ -68,5 +68,48 @@ def plot_tree(graph, feature_names=None, class_names=None):
 
 plot_tree(dt)
 
-
     # Then copy the code over for dealing with bias and variance issues in regression decision trees
+
+###################################################################################
+                            # RANDOM FOREST REGRESSOR
+###################################################################################
+from sklearn.ensemble import RandomForestRegressor
+forest = RandomForestRegressor(n_estimators=100, max_depth=10, bootstrap=True, n_jobs =-1)
+forest.fit(X_train, y_train)
+y_pred = forest.predict(X_test)
+forest.estimators_
+
+
+feature_importances = forest.feature_importances_
+feature_importances = feature_importances[:10,]
+features = X_train.columns
+indices = np.argsort(feature_importances)
+
+plt.title('Feature Importances')
+plt.barh(range(len(indices)), feature_importances[indices], color='b', align='center')
+plt.yticks(range(len(indices)), [features[i] for i in indices])
+plt.xlabel('Relative Importance')
+plt.show()
+
+# train a regressor with only the most important features:
+# Make predictions and determine the error
+y_pred = forest.predict(X_test)
+from sklearn import metrics
+
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+# Random forest using only the 2most important variables
+# New random forest with only the two most important variables
+rf_most_important = RandomForestRegressor(n_estimators= 1000, random_state=42)
+# Extract the two most important features
+features.to_numpy()
+important_indices = [features['ccg_code1'], features['date_open1']]
+train_important = train_features[:, important_indices]
+test_important = test_features[:, important_indices]
+# Train the random forest
+rf_most_important.fit(train_important, train_labels)
+
+
+

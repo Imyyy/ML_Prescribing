@@ -65,6 +65,7 @@ logreg.score(X_test, y_pred) # Mean accuracy on the given test data and labels
                             # OUTPUT METRICS
 ###################################################################################
 #Evaluating this model using mean squared error
+# Should be minimising the binary cross entropy here  - need to change things?
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 print('Root mean squared error:')

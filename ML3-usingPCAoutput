@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') 
+os.chdir('/Users/imyyounge/Documents/4_Masters/4_Machine_learning/Nov_2019_Prescribing_Data/Code') # Comment this out for the HPC
 final = pd.read_csv('final.csv') # Correction: Need to use the dataset outputted by categorical_and_exclusion
 def rename_unname(df):
     for col in df:
@@ -37,48 +37,69 @@ scaler.transform(X_train)
                             # FITTING PCA
 #########################################################################
 from sklearn.decomposition import PCA
-pca = PCA(n_components=2, random_state=42) #Initialise the PCA, with 2 components
+pca = PCA(n_components=3, random_state=42) #Initialise the PCA, with 2 components
 pca.fit(X_train) # Fit the PCA from X_train 
+print("PCA Explained variance ratio")
 print(pca.explained_variance_ratio_)
+print("Cumulative PCA Explained variance ratio")
 print(pca.explained_variance_ratio_.cumsum()) # PCA
 X_train_pca = pca.transform(X_train) #Need to do the same idea to training data # Create a pandas dataframe
 X_train_pca =  pd.DataFrame(X_train_pca)
-X_train_pca.columns = ['PC1','PC2']
+X_train_pca.columns = ['PC1','PC2', 'PC3']
 X_test_pca = pca.transform(X_test) # Transform the X_test set test
 X_test_pca =  pd.DataFrame(X_test_pca)
-X_test_pca.columns = ['PC1','PC2']
-
-
-
+X_test_pca.columns = ['PC1','PC2', 'PC3']
 
 #########################################################################
                             # PLOTTING THE OUTPUT
 #########################################################################
 sns.regplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], fit_reg=False)
 
-sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0])
+sns.jointplot(x=X_train_pca["PC1"], y=X_train_pca["PC2"], kind='kde', xlim = [-50000, 0]) # Get kernel density estimation plot
 
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(X_train_pca['PC1'], X_train_pca['PC2'], X_train_pca['PC3'], c='blue', s=60)
+ax.view_init(30, 30)
+plt.show()
+
+#Plot amount of variance explained
+explained = pca.explained_variance_ratio_.cumsum()
+explained = np.array(explained)
+PC = [1, 2, 3]
+PC = np.array(PC)
+df = pd.DataFrame['PC', 'explained']
+df = pd.DataFrame({'PC': PC, 'explained': list(explained)}, columns=['PC', 'explained'])
+
+
+
+sns.lineplot(x=PC, y=explained, data=df)
+sns.plt.ylim(0, 1)
+sns.plt.show()
 #########################################################################
                             # REGRESSION
 #########################################################################
 from sklearn.linear_model import LinearRegression
 regress = LinearRegression()
-regress.fit(X_train_pca, y_train)
-print(regress.intercept_)
-coeff_df = pd.DataFrame(regress.coef_, columns=['Coefficient']) # get an issue here, not sure why 
-coeff_df #Look at the coefficients from the model
 
-y_pred = regress.predict(X_test) # Make predictions using this model
-reg_output = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred})
+regress.fit(X_train_pca, y_train)
+print("Regression intercept")
+print(regress.intercept_)
+pca_regression_coefficients = pd.DataFrame(regress.coef_, columns=['Coefficient']) # get an issue here, not sure why 
+pca_regression_coefficients #Look at the coefficients from the model
+
+y_pred_pca = regress.predict(X_test_pca) # Make predictions using this model
+reg_output = pd.DataFrame({'Actual': y_test, 'Predicted': y_pred_pca})
 print(reg_output.head(15))
 
 #########################################################################
                         # EVALUATING REGRESSION
 #########################################################################
 from sklearn import metrics
-print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
-print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
-print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred_pca))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred_pca))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred_pca)))
 
 # Plot the outcome of the actual and predicted y values
 reg_output['Actual-log'] = np.log(reg_output['Actual'])
@@ -86,12 +107,6 @@ reg_output['Predicted-log'] = np.log(reg_output['Predicted'])
 
 sns.regplot(x="Actual", y="Predicted", data=reg_output)
 sns.regplot(x="Actual-log", y="Predicted-log", data=reg_output)
-
-
-
-
-
-
 
 
 
